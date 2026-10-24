@@ -1,0 +1,109 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Service {
+  id          String @id
+  name        String
+  type        String
+  providerId  String @map("provider_id")
+  priceSatang Int    @map("price_satang")
+  orderLines  OrderLine[]
+
+  @@map("services")
+}
+
+model User {
+  id          String   @id
+  name        String
+  ordersCount Int      @default(0) @map("orders_count")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  redemptions CouponRedemption[]
+  orders      Order[]
+
+  @@map("users")
+}
+
+model Coupon {
+  code              String  @id
+  status            String
+  kind              String
+  value             Int
+  maxDiscountSatang Int?    @map("max_discount_satang")
+  scopeKind         String  @map("scope_kind")
+  scopeValue        String? @map("scope_value")
+  minSpendSatang    Int     @default(0) @map("min_spend_satang")
+  startsOn          String? @map("starts_on")
+  endsOn            String? @map("ends_on")
+  usageLimit        Int?    @map("usage_limit")
+  usedCount         Int     @default(0) @map("used_count")
+  perCustomerLimit  Int?    @map("per_customer_limit")
+  firstOrderOnly    Boolean @default(false) @map("first_order_only")
+  stackable         Boolean @default(true)
+  redemptions       CouponRedemption[]
+  orderCoupons      OrderCoupon[]
+
+  @@map("coupons")
+}
+
+model CouponRedemption {
+  userId     String @map("user_id")
+  couponCode String @map("coupon_code")
+  count      Int    @default(0)
+  user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  coupon     Coupon @relation(fields: [couponCode], references: [code])
+
+  @@id([userId, couponCode])
+  @@map("coupon_redemptions")
+}
+
+model Order {
+  id             String   @id @default(uuid())
+  userId         String?  @map("user_id")
+  subtotalSatang Int      @map("subtotal_satang")
+  discountSatang Int      @map("discount_satang")
+  netSatang      Int      @map("net_satang")
+  vatSatang      Int      @map("vat_satang")
+  totalSatang    Int      @map("total_satang")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  user           User?    @relation(fields: [userId], references: [id])
+  lines          OrderLine[]
+  coupons        OrderCoupon[]
+
+  @@map("orders")
+}
+
+model OrderLine {
+  id           Int     @id @default(autoincrement())
+  orderId      String  @map("order_id")
+  serviceId    String  @map("service_id")
+  quantity     Int
+  amountSatang Int     @map("amount_satang")
+  afterSatang  Int     @map("after_discounts_satang")
+  discounts    Json
+  order        Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  service      Service @relation(fields: [serviceId], references: [id])
+
+  @@map("order_lines")
+}
+
+model OrderCoupon {
+  orderId        String @map("order_id")
+  couponCode     String @map("coupon_code")
+  discountSatang Int    @map("discount_satang")
+  order          Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  coupon         Coupon @relation(fields: [couponCode], references: [code])
+
+  @@id([orderId, couponCode])
+  @@map("order_coupons")
+}
