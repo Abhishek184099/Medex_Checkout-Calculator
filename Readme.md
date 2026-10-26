@@ -1,71 +1,79 @@
-    # Medex Checkout Calculator
+# Medex Checkout Calculator
 
-    A checkout calculator for a healthcare marketplace that allows users to add services to their cart and apply up to two coupon codes per order.
+A checkout calculator for a healthcare marketplace that allows users to add services to their cart and apply up to two coupon codes per order.
 
-    The backend validates each coupon, checks its eligibility, and calculates the applicable discounts. It then calculates the 7% VAT and returns a detailed price breakdown, including the subtotal, discounts, VAT, and final amount payable.
+The backend validates each coupon, checks its eligibility, and calculates the applicable discounts. It then calculates the 7% VAT and returns a detailed price breakdown, including the subtotal, discounts, VAT, and final amount payable.
 
-    ## Project structure
-    - `backend/`: Express, TypeScript, Prisma, PostgreSQL
-    - `frontend/`: React, Vite, TypeScript, Tailwind CSS
-    - `checkout.json`: fictional services, customers, coupons and examples
+## Project structure
+- `backend/`: Express, TypeScript, Prisma, PostgreSQL
+- `frontend/`: React, Vite, TypeScript, Tailwind CSS
+- `checkout.json`: fictional services, customers, coupons and examples
 
-    ## Running Locally
+## Running Locally
 
-    **Requirements:** Node.js 20.19+ or 22.12+, PostgreSQL 16, and npm.
+**Requirements:** Node.js 20.19+ or 22.12+, PostgreSQL 16, and npm.
 
-    ### 1. Create the Database
+### 1. Create the Database
 
-    Using `psql` or pgAdmin, connect to your PostgreSQL server and run:
+Using `psql` or pgAdmin, connect to your PostgreSQL server and run:
 
-    ```sql
-    CREATE DATABASE medex;
-    ```
+```sql
+CREATE DATABASE medex;
+```
 
-    ### 2. Configure the Environment
+### 2. Configure the Environment
 
-    Create or update `backend/.env` with your local PostgreSQL connection details:
+Create or update `backend/.env` with your local PostgreSQL connection details:
 
-    ```env
-    DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@localhost:5432/medex?schema=public"
-    PORT=4000
-    ```
+```env
+DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@localhost:5432/medex?schema=public"
+PORT=4000
+```
 
-    Replace `YOUR_PASSWORD` with your PostgreSQL password. The default PostgreSQL port is `5432`. Change it if your installation uses a different port.
+Replace `YOUR_PASSWORD` with your PostgreSQL password. The default PostgreSQL port is `5432`. Change it if your installation uses a different port.
 
-    ### 3. Start the Backend
+### 3. Start the Backend
 
-    Open a terminal and run:
+Open a terminal and run:
 
-    ```bash
-    cd backend
-    npm install
-    npx prisma migrate dev
-    npx prisma generate
-    npm run db:seed
-    npm run dev
-    ```
+```bash
+cd backend
+npm install
+npx prisma migrate dev
+npx prisma generate
+npm run db:seed
+npm run dev
+```
 
-    The backend API will be available at `http://localhost:4000/api`.
+The backend API will be available at `http://localhost:4000/api`.
 
-    ### 4. Start the Frontend
+### 4. Start the Frontend
 
-    Open a **second terminal** and run:
+Open a **second terminal** and run:
 
-    ```bash
-    cd frontend
-    npm install
-    npm run dev
-    ```
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-    The frontend will be available at `http://localhost:5173`.
+The frontend will be available at `http://localhost:5173`.
 
-    ### 5. Run the Tests
+### 5. Run the Tests
 
-    From the `backend/` directory, run:
+From the `backend/` directory, run:
 
-    ```bash
-    npm test
-    ```
+```bash
+npm test
+```
+
+## API
+
+| Method | Path | Purpose |
+|---|---|---|
+| GET | `/api/services` | List services |
+| POST | `/api/quote` | Calculate a quote (no changes saved) |
+| POST | `/api/orders` | Place an order (uses coupons, returns 409 if the quote changed) |
 
 ## Design Choices
 
@@ -91,7 +99,7 @@
 
 6. **Splitting Discounts:** Discounts are shared across eligible cart items based on their amounts after earlier discounts. Any rounding difference goes to the largest eligible item, with the first item winning ties.
 
-7. **Final Total:** The net amount is the subtotal minus discounts. VAT is 7% of the net amount, rounded to the nearest satang, and added to get the final total. 
+7. **Final Total:** The net amount is the subtotal minus discounts. VAT is 7% of the net amount, rounded to the nearest satang, and added to get the final total.
 
 ## Rounding
 
@@ -121,9 +129,3 @@ If any step fails, the whole transaction rolls back and the API returns `409` wi
 ## AI Tools
 
 AI tools helped me develop the business logic, define the coupon rules, build the calculation logic, and debug issues during development. I reviewed the logic against the examples in `checkout.json`, and the tests cover every example.
-
-
-
-
-
-
